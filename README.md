@@ -4,7 +4,9 @@
   <img src="https://img.shields.io/badge/Chain%20ID-42431-purple?style=for-the-badge">
   <img src="https://img.shields.io/badge/Client-Tempo-green?style=for-the-badge">
   <img src="https://img.shields.io/badge/Mode-Full%20Node-yellow?style=for-the-badge">
-  <img src="https://img.shields.io/endpoint?url=https://38.49.209.207/status.json">
+  <img src="https://img.shields.io/endpoint?style=for-the-badge&url=https://tempo.cubepoker.com/status.json">
+</p>
+
 </p>
 
 # 🚀 Tempo Node Setup Guide (Moderato Testnet)
