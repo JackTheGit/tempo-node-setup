@@ -10,6 +10,26 @@
 
 This guide will walk you through setting up a **Tempo full node** on a Linux VPS using the **Moderato testnet** (launched Jan 8).
 
+## 📚 Table of Contents
+
+- [System Requirements](#-system-requirements)
+- [1) Disable Cloud-Init Network Overrides](#-1-disable-cloud-init-network-overrides)
+- [2) Configure Netplan DNS](#-2-configure-netplan-dns)
+- [3) Install System Dependencies](#-3-install-system-dependencies)
+- [4) Install Rust](#-4-install-rust)
+- [5) Install Tempo](#-5-install-tempo)
+- [6) Generate Validator Keys](#-6-generate-validator-keys)
+- [7) Start Screen Session](#-7-start-screen-session)
+- [8) Download Chain Snapshot](#-8-download-chain-snapshot)
+- [9) Start the Node](#-9-start-the-node)
+- [Detach Screen](#-detach-screen-leave-node-running)
+- [Check Sync Status](#-check-sync-status)
+- [Confirm Network](#-confirm-network)
+- [Check Peer Count](#-check-peer-count)
+- [Done](#-done)
+- [Systemd Auto-Start Service (Optional)](#-systemd-auto-start-service-optional)
+
+
 ---
 
 ## 🧰 System Requirements
