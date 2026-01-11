@@ -7,8 +7,6 @@
   <img src="https://img.shields.io/endpoint?style=for-the-badge&url=https://tempo.cubepoker.com/status.json">
 </p>
 
-</p>
-
 # 🚀 Tempo Node Setup Guide (Moderato Testnet)
 
 This guide will walk you through setting up a **Tempo full node** on a Linux VPS using the **Moderato testnet** (launched Jan 8).
@@ -32,8 +30,46 @@ This guide will walk you through setting up a **Tempo full node** on a Linux VPS
 - [Done](#-done)
 - [Systemd Auto-Start Service (Optional)](#-systemd-auto-start-service-optional)
 
+---
+
+## ⚡ One-Click Install (Recommended)
+
+This installs **Tempo + dependencies + snapshot + auto-restart systemd service** in one command.
+
+```bash
+git clone https://github.com/JackTheGit/tempo-node-setup.git
+cd tempo-node-setup
+
+# GitHub may not preserve executable permissions
+chmod +x install.sh
+
+# Replace with your wallet address
+FEE_RECIPIENT=0xYourWalletHere sudo -E bash install.sh
+```
+
+### After install
+
+Check logs:
+
+```bash
+sudo journalctl -u tempo -f
+```
+
+Check service:
+
+```bash
+sudo systemctl status tempo --no-pager
+```
+
+Stop / start:
+
+```bash
+sudo systemctl stop tempo
+sudo systemctl start tempo
+```
 
 ---
+
 
 ## 🧰 System Requirements
 
