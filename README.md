@@ -441,19 +441,19 @@ I/O
 
 ## Live Tempo Node Dashboard
 
-![Tempo Monitoring](images/monitoring/01-dashboard.png)
+![Tempo Monitoring](images/01-dashboard.png)
 
 This dashboard shows real-time CPU, memory, disk and kernel pressure.
 
 ## Linux Pressure Stall Information (PSI)
 
-![PSI](images/monitoring/02-pressure.png)
+![PSI](images/02-pressure.png)
 
 PSI measures how long Linux tasks are stalled waiting for CPU, memory or disk.
 
 ## Verifying PSI Export
 
-![Metrics](images/monitoring/03-metrics.png)
+![Metrics](images/03-metrics.png)
 
 These counters come directly from `/proc/pressure/*` in the Linux kernel and prove PSI is active on the host.
 
