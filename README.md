@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/OS-Ubuntu%2022.04-orange?style=for-the-badge&logo=ubuntu">
+  <img src="https://img.shields.io/badge/OS-Ubuntu%2024.04%20LTS-orange?style=for-the-badge&logo=ubuntu">
   <img src="https://img.shields.io/badge/Network-Moderato%20Testnet-blue?style=for-the-badge">
   <img src="https://img.shields.io/badge/Chain%20ID-42431-purple?style=for-the-badge">
   <img src="https://img.shields.io/badge/Client-Tempo-green?style=for-the-badge">
@@ -275,3 +275,248 @@ Your Tempo node is now:
 * Fully synced
 * Serving RPC
 * Connected to consensus 🚀
+
+
+
+# 📊 Tempo Node Monitoring (Grafana + Prometheus + PSI)
+
+Tempo nodes must stay responsive under sustained disk and network load.
+Traditional CPU and RAM charts are **not enough** — Linux can be *stalled* even when CPU is idle.
+
+This guide enables **Linux PSI (Pressure Stall Information)** so you can see:
+
+* CPU scheduling pressure
+* Memory reclaim pressure
+* Disk I/O stalls
+
+All in **real-time** via Grafana.
+
+---
+
+## What You Get
+
+You will get a live dashboard showing:
+
+| Metric              | What it means                      |
+| ------------------- | ---------------------------------- |
+| CPU Busy            | Actual CPU usage                   |
+| RAM Used            | Real memory consumption            |
+| Disk Used           | Root filesystem usage              |
+| **CPU Pressure**    | Time CPU tasks were stalled        |
+| **Memory Pressure** | Time memory allocation was blocked |
+| **I/O Pressure**    | Time disk I/O was blocked          |
+
+This lets you detect **node starvation** before it causes missed blocks or degraded rewards.
+
+---
+
+## Step 1 — Enable Linux PSI on the Host
+
+PSI is available on all modern Linux kernels but must be exposed.
+
+Verify PSI exists:
+
+```bash
+ls /proc/pressure
+```
+
+You should see:
+
+```
+cpu
+io
+memory
+```
+
+If not, your kernel is too old.
+
+---
+
+## Step 2 — Run Node Exporter With PSI Support
+
+We must give Node Exporter access to the **host kernel**.
+
+Run Node Exporter like this:
+
+```bash
+docker rm -f node-exporter || true
+
+docker run -d --name node-exporter \
+  --restart=always \
+  --net=host \
+  --pid=host \
+  -v "/:/host:ro,rslave" \
+  prom/node-exporter:latest \
+  --path.rootfs=/host \
+  --path.procfs=/host/proc \
+  --path.sysfs=/host/sys
+```
+
+Verify PSI is being exported:
+
+```bash
+curl -s http://127.0.0.1:9100/metrics | grep node_pressure
+```
+
+You should see:
+
+```
+node_pressure_cpu_waiting_seconds_total
+node_pressure_io_waiting_seconds_total
+node_pressure_memory_waiting_seconds_total
+```
+
+> ⚠️ Node Exporter is read-only (`:ro`) and does **not** modify your system — it only exposes metrics.
+
+---
+
+## Step 3 — Prometheus Config
+
+Ensure Prometheus scrapes Node Exporter:
+
+```yaml
+scrape_configs:
+  - job_name: "node"
+    static_configs:
+      - targets: ["127.0.0.1:9100"]
+```
+
+Restart Prometheus if needed.
+
+---
+
+## Step 4 — Import the Dashboard
+
+Import this dashboard into Grafana:
+
+**Dashboard ID:** `1860`
+or
+Use the **Node Exporter Full** dashboard and then add PSI panels.
+
+---
+
+## Step 5 — Pressure (PSI) Queries
+
+Add a **Bar Gauge** panel named **Pressure** with these queries:
+
+### CPU Pressure
+
+```promql
+100 * sum(irate(node_pressure_cpu_waiting_seconds_total[5m]))
+```
+
+Legend:
+
+```
+CPU
+```
+
+---
+
+### Memory Pressure
+
+```promql
+100 * sum(irate(node_pressure_memory_waiting_seconds_total[5m]))
+```
+
+Legend:
+
+```
+Mem
+```
+
+---
+
+### I/O Pressure
+
+```promql
+100 * sum(irate(node_pressure_io_waiting_seconds_total[5m]))
+```
+
+Legend:
+
+```
+I/O
+```
+
+## Live Tempo Node Dashboard
+
+![Tempo Monitoring](images/monitoring/01-dashboard.png)
+
+This dashboard shows real-time CPU, memory, disk and kernel pressure.
+
+## Linux Pressure Stall Information (PSI)
+
+![PSI](images/monitoring/02-pressure.png)
+
+PSI measures how long Linux tasks are stalled waiting for CPU, memory or disk.
+
+## Verifying PSI Export
+
+![Metrics](images/monitoring/03-metrics.png)
+
+These counters come directly from `/proc/pressure/*` in the Linux kernel and prove PSI is active on the host.
+
+> If CPU Pressure > 5% or I/O Pressure > 10% for extended periods, your node will start missing blocks.
+
+---
+
+## How To Set Legends
+
+For each query:
+
+1. Click **Legend**
+2. Select **Custom**
+3. Enter:
+
+   * `CPU`
+   * `Mem`
+   * `I/O`
+
+This ensures they appear cleanly instead of `Value`.
+
+---
+
+## Example — Live Public Dashboard
+
+This Tempo node is publicly monitored using PSI:
+
+👉 **[https://grafana.slotsdroid.com/public-dashboards/27433cfd8c71408babb8842e143ac55f](https://grafana.slotsdroid.com/public-dashboards/27433cfd8c71408babb8842e143ac55f)**
+
+It shows:
+
+* CPU, memory, disk
+* Live network traffic
+* **Kernel-level stall pressure**
+
+---
+
+## Why PSI Matters For Tempo
+
+Your node can fail even when:
+
+* CPU looks low
+* RAM looks free
+
+But PSI shows when:
+
+* Disk is saturated
+* Kernel is blocking
+* Processes are waiting
+
+This is exactly what causes:
+
+* Missed attestations
+* Slow gossip
+* Lost rewards
+
+PSI = **early warning system**
+
+---
+
+## You Are Now Running a Professional-Grade Node
+
+Most nodes run blind.
+
+You now see **what the kernel sees** — and that’s how you keep a Tempo node healthy under load 🚀
+
